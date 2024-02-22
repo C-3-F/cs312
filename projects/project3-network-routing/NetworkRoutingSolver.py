@@ -2,6 +2,7 @@
 
 
 from CS312Graph import *
+from PriorityQueue import *
 import time
 
 
@@ -21,14 +22,18 @@ class NetworkRoutingSolver:
         #       NEED TO USE
         path_edges = []
         total_length = 0
-        node = self.network.nodes[self.source]
-        edges_left = 3
-        while edges_left > 0:
-            edge = node.neighbors[2]
-            path_edges.append( (edge.src.loc, edge.dest.loc, '{:.0f}'.format(edge.length)) )
-            total_length += edge.length
-            node = edge.dest
-            edges_left -= 1
+        node = self.network.nodes[destIndex]
+        while node is not None:
+            prev = node.prev
+            if prev is None:
+                break
+            for edge in prev.neighbors:
+                if edge.dest.node_id == node.node_id:   
+                    path_edges.append( (edge.src.loc, edge.dest.loc, '{:.0f}'.format(edge.length)) )
+                    total_length += edge.length
+            node = node.prev
+        # if node.dist == float('inf'):
+        #     return {'cost':float('inf'), 'path':[]}
         return {'cost':total_length, 'path':path_edges}
 
     def computeShortestPaths( self, srcIndex, use_heap=False ):
@@ -37,6 +42,30 @@ class NetworkRoutingSolver:
         # TODO: RUN DIJKSTRA'S TO DETERMINE SHORTEST PATHS.
         #       ALSO, STORE THE RESULTS FOR THE SUBSEQUENT
         #       CALL TO getShortestPath(dest_index)
+
+        #print("Running Dijkstra's")
+        if use_heap:
+            q = None
+        else:
+            q = PriorityQueueArray(self.network.nodes)
+        
+        for node in self.network.nodes:
+            node.dist = float('inf')
+            node.prev = None
+        self.network.nodes[srcIndex].dist = 0
+
+        q.make_queue(self.network.nodes)
+
+        while len(q.queue) > 0:
+            minIndex = q.delete_min()
+            u = self.network.nodes[minIndex]
+            for edge in u.neighbors:
+                dest = edge.dest
+                if u.dist + edge.length < dest.dist:
+                    dest.dist = u.dist + edge.length
+                    dest.prev = u
+                    q.decrease_key(dest, dest.dist)
+
         t2 = time.time()
         return (t2-t1)
 
