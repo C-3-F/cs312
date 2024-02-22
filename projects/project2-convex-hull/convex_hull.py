@@ -81,7 +81,7 @@ class ConvexHullSolver(QObject):
         for i in range(len(polygon)):
             hull.append(QLineF(polygon[i], polygon[(i + 1) % len(polygon)]))
         self.showHull(hull,RED)
-        self.showText('Time Elapsed (Convex Hull): {:3.3f} sec'.format(t4-t3))
+        self.showText('Time Elapsed (Convex Hull): {:3.5f} sec'.format(t4-t3))
 
     
     def divide_and_conquer(self, points: list, a: int):
