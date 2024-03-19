@@ -10,6 +10,15 @@
       "request": "launch",
       "program": "projects/project3-network-routing/Proj3GUI.py",
       "console": "integratedTerminal"
+    },
+
+    {
+      "name": "Project 4: Gene Sequencing",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "Proj4GUI.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/projects/project4-gene-sequencing"
     }
   ]
 }
