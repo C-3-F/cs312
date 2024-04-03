@@ -80,10 +80,42 @@ class TSPSolver:
 		algorithm</returns>
 	'''
 
-	def greedy( self,time_allowance=60.0 ):
-		pass
+	def greedy(self, time_allowance=60.0, start_city=0):
+		cities = self._scenario.getCities().copy()
+		ncities = len(cities)
+		start_time = time.time()
+		bssf = None
+		solvable = True
 
-
+		route = []
+		for i in range(ncities):
+			cities_copy = cities.copy()
+			min_dist = math.inf
+			min_city = None
+			for j in range(len(cities_copy)):
+				if route == []:
+					route.append(cities_copy[start_city])
+					cities.remove(cities_copy[start_city])
+					break
+				if route[-1].costTo(cities_copy[j]) < min_dist:
+					min_dist = route[-1].costTo(cities_copy[j])
+					min_city = cities_copy[j]
+			if min_city is None:
+				if i > 0:
+					solvable = False
+				continue
+			route.append(min_city)
+			cities.remove(min_city)
+		bssf = TSPSolution(route) if solvable else None
+		if solvable is False:
+			return self.greedy(time_allowance, start_city+1)
+		end_time = time.time()
+		results = {}
+		results['cost'] = bssf.cost if bssf is not None else math.inf
+		results['time'] = end_time - start_time
+		results['count'] = 1
+		results['soln'] = bssf
+		return results
 
 	''' <summary>
 		This is the entry point for the branch-and-bound algorithm that you will implement
@@ -95,7 +127,93 @@ class TSPSolver:
 	'''
 
 	def branchAndBound( self, time_allowance=60.0 ):
-		pass
+		initial_bssf = self.getInitialBssf()
+		bssfCost = initial_bssf
+		bssfRoute = []
+		cities = self._scenario.getCities().copy()
+		start_time = time.time()
+		solution_count = 0	
+		max_queue_size = 0
+		total_states_created = 0
+		pruned_states = 0
+
+		
+		initial_matrix = self.getInitialMatrix(cities)
+		
+		init = PartialPath([0],initial_matrix,0)
+		queue = []
+		heapq.heappush(queue, init)
+
+		while queue:
+			if len(queue) > max_queue_size:
+				max_queue_size = len(queue)
+
+			p: PartialPath = heapq.heappop(queue)
+
+			if time.time() - start_time > time_allowance:
+				break
+			
+			if p.lower_bound < bssfCost:
+				t = self.expandAndTest(p)
+				for p_i in t:
+					total_states_created += 1
+					if len(p_i.route) == len(cities):
+						cost_to_start = cities[p_i.route[-1]].costTo(cities[0])
+						if p_i.cost + cost_to_start < bssfCost:
+							p_i.cost += cost_to_start
+							bssfCost = p_i.cost
+							bssfRoute = p_i.route
+							solution_count += 1
+					elif p_i.lower_bound < bssfCost:
+						heapq.heappush(queue, p_i)
+					else:
+						pruned_states += 1
+
+		bssf = TSPSolution([cities[i] for i in bssfRoute]) if bssfRoute != [] else None
+
+		end_time = time.time()
+		results = {}
+		results['cost'] = bssfCost
+		results['time'] = end_time - start_time
+		results['count'] = solution_count
+		results['soln'] = bssf
+		results['max'] = max_queue_size
+		results['total'] = total_states_created
+		results['pruned'] = pruned_states
+		return results
+	
+
+
+	def getInitialMatrix(self, cities):
+		matrix = np.full((len(cities), len(cities)), np.inf)
+		for i in range(len(cities)):
+			for j in range(len(cities)):
+				matrix[i,j] = cities[i].costTo(cities[j])
+		return matrix
+
+	def getInitialBssf(self):
+		# init = self.greedy()['cost'] # Greedy Tour
+		init = np.inf # Infinity
+		# init = self.defaultRandomTour()['cost'] # Random Tour
+		return init
+
+	
+	def expandAndTest(self, p: PartialPath):
+		exp = []
+		for i in range(len(p.matrix)):
+			if i not in p.route:
+				partial_path_matrix = p.matrix.copy()
+				partial_path_matrix[p.route[-1], i] = np.inf
+				for j in range(len(partial_path_matrix)):
+					partial_path_matrix[p.route[-1], j] = np.inf
+					partial_path_matrix[j, i] = np.inf
+				partial_path = PartialPath(p.route + [i], partial_path_matrix, p.cost + p.matrix[p.route[-1], i])
+				exp.append(partial_path)
+		return exp
+
+
+
+
 
 
 
@@ -110,3 +228,4 @@ class TSPSolver:
 
 	def fancy( self,time_allowance=60.0 ):
 		pass
+		

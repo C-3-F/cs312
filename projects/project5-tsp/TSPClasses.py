@@ -170,3 +170,50 @@ class City:
 
 		return int(math.ceil(cost * self.MAP_SCALE))
 
+	def __eq__(self, __value: object) -> bool:
+		return self._index == __value._index
+	
+
+class PartialPath:
+
+	A = 2
+	B = 3
+	C = 1
+
+	def __init__( self, route: np.ndarray[int], matrix: np.ndarray, cost: float, compute_lower_bound: bool = True):
+		self.route = route
+		self.cost = cost
+		self.matrix = matrix
+		self.reduced_matrix = matrix.copy()
+		self.lower_bound = None
+
+		if compute_lower_bound:
+			self.lower_bound = self.__getLowerBound()
+		self.weight = self.__getHeapWeight()
+
+	def __getLowerBound(self):
+		reduction_cost = 0
+		# reduce rows
+		for i in self.reduced_matrix:
+			min_val = np.min(i)
+			if min_val != np.inf:
+				reduction_cost += min_val
+				i -= min_val
+
+		# reduce columns
+		for i in range(len(self.reduced_matrix)):
+			min_val = np.min(self.reduced_matrix[:,i])
+			if min_val != np.inf:
+				reduction_cost += min_val
+				self.reduced_matrix[:,i] -= min_val
+		self.lower_bound = self.cost + reduction_cost
+		return self.lower_bound
+
+	def __getHeapWeight(self):
+		lb = self.lower_bound
+		depth = len(self.route)
+		weight = 1 / (self.A * lb + self.B * (1 / (depth + self.C)))
+		return weight
+
+	def __lt__(self, other):
+		return self.weight < other.weight
