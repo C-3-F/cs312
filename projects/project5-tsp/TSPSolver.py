@@ -81,31 +81,40 @@ class TSPSolver:
 	'''
 
 	def greedy(self, time_allowance=60.0, start_city=0):
+		# Initialize variables
 		cities = self._scenario.getCities().copy()
 		ncities = len(cities)
 		start_time = time.time()
 		bssf = None
 		solvable = True
 
+		#Start with Empty Route
+		# Iterate through cities and find the closest city to the last city in the route
 		route = []
 		for i in range(ncities):
 			cities_copy = cities.copy()
 			min_dist = math.inf
 			min_city = None
 			for j in range(len(cities_copy)):
+				# Logic for the first city in the route. It will always be the start city
 				if route == []:
 					route.append(cities_copy[start_city])
 					cities.remove(cities_copy[start_city])
 					break
+				# Find the closest city to the last city in the route
 				if route[-1].costTo(cities_copy[j]) < min_dist:
 					min_dist = route[-1].costTo(cities_copy[j])
 					min_city = cities_copy[j]
+			# If no city is found, the route is not solvable
 			if min_city is None:
 				if i > 0:
 					solvable = False
 				continue
+			# Add the closest city to the route and remove it from the cities list
 			route.append(min_city)
 			cities.remove(min_city)
+		
+		# Create a TSPSolution object from the route
 		bssf = TSPSolution(route) if solvable else None
 		if solvable is False:
 			return self.greedy(time_allowance, start_city+1)
@@ -127,6 +136,7 @@ class TSPSolver:
 	'''
 
 	def branchAndBound( self, time_allowance=60.0 ):
+		# Initialize variables
 		initial_bssf = self.getInitialBssf()
 		bssfCost = initial_bssf
 		bssfRoute = []
@@ -137,13 +147,15 @@ class TSPSolver:
 		total_states_created = 0
 		pruned_states = 0
 
-		
+		# Create a PartialPath object with the initial matrix
 		initial_matrix = self.getInitialMatrix(cities)
-		
 		init = PartialPath([0],initial_matrix,0)
+
+		# Create a priority queue and add the initial PartialPath object
 		queue = []
 		heapq.heappush(queue, init)
 
+		# Loop through the queue until it is empty or the time allowance is reached
 		while queue:
 			if len(queue) > max_queue_size:
 				max_queue_size = len(queue)
@@ -153,22 +165,29 @@ class TSPSolver:
 			if time.time() - start_time > time_allowance:
 				break
 			
+			
 			if p.lower_bound < bssfCost:
 				t = self.expandAndTest(p)
 				for p_i in t:
 					total_states_created += 1
+
+					# Check if the PartialPath object is a complete route
 					if len(p_i.route) == len(cities):
 						cost_to_start = cities[p_i.route[-1]].costTo(cities[0])
+						# If the cost of the route is less than the current bssf, update the bssf
 						if p_i.cost + cost_to_start < bssfCost:
 							p_i.cost += cost_to_start
 							bssfCost = p_i.cost
 							bssfRoute = p_i.route
 							solution_count += 1
+					# Otherwise, if the lower bound is less than the current bssf, add it to the queue for a potential improvement
 					elif p_i.lower_bound < bssfCost:
 						heapq.heappush(queue, p_i)
+					# If the lower bound is greater than the current bssf, prune the state
 					else:
 						pruned_states += 1
 
+		# Create a TSPSolution object from the route
 		bssf = TSPSolution([cities[i] for i in bssfRoute]) if bssfRoute != [] else None
 
 		end_time = time.time()
@@ -183,7 +202,7 @@ class TSPSolver:
 		return results
 	
 
-
+	# Create a matrix of costs between cities
 	def getInitialMatrix(self, cities):
 		matrix = np.full((len(cities), len(cities)), np.inf)
 		for i in range(len(cities)):
@@ -191,13 +210,14 @@ class TSPSolver:
 				matrix[i,j] = cities[i].costTo(cities[j])
 		return matrix
 
+	# Get the initial BSSF. This is configurable to use a greedy tour, infinity, or a random tour
 	def getInitialBssf(self):
-		# init = self.greedy()['cost'] # Greedy Tour
-		init = np.inf # Infinity
+		init = self.greedy()['cost'] # Greedy Tour
+		# init = np.inf # Infinity
 		# init = self.defaultRandomTour()['cost'] # Random Tour
 		return init
 
-	
+	# Expand the PartialPath object and create new matrices for each possible route
 	def expandAndTest(self, p: PartialPath):
 		exp = []
 		for i in range(len(p.matrix)):

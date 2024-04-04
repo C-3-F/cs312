@@ -176,8 +176,12 @@ class City:
 
 class PartialPath:
 
+	# Heap weight constants
+	# A controls the weight of the lower bound
 	A = 2
+	# B controls the weight of the depth
 	B = 3
+	# C is a constant to prevent division by zero
 	C = 1
 
 	def __init__( self, route: np.ndarray[int], matrix: np.ndarray, cost: float, compute_lower_bound: bool = True):
@@ -209,11 +213,13 @@ class PartialPath:
 		self.lower_bound = self.cost + reduction_cost
 		return self.lower_bound
 
+	# Calculate the weight of the PartialPath object for the heap with the inverse proportion of the lower bound and the depth
 	def __getHeapWeight(self):
 		lb = self.lower_bound
 		depth = len(self.route)
 		weight = 1 / (self.A * lb + self.B * (1 / (depth + self.C)))
 		return weight
 
+	# Override the less than operator to compare the weight of the PartialPath objects
 	def __lt__(self, other):
 		return self.weight < other.weight
