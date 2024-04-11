@@ -1,0 +1,15 @@
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\bin\Debug\net8.0\project6-leetcode.exe
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\bin\Debug\net8.0\project6-leetcode.deps.json
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\bin\Debug\net8.0\project6-leetcode.runtimeconfig.json
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\bin\Debug\net8.0\project6-leetcode.dll
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\bin\Debug\net8.0\project6-leetcode.pdb
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\obj\Debug\net8.0\project6-leetcode.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\obj\Debug\net8.0\project6-leetcode.AssemblyInfoInputs.cache
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\obj\Debug\net8.0\project6-leetcode.AssemblyInfo.cs
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\obj\Debug\net8.0\project6-leetcode.csproj.CoreCompileInputs.cache
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\obj\Debug\net8.0\project6-leetcode.sourcelink.json
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\obj\Debug\net8.0\project6-leetcode.dll
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\obj\Debug\net8.0\refint\project6-leetcode.dll
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\obj\Debug\net8.0\project6-leetcode.pdb
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\obj\Debug\net8.0\project6-leetcode.genruntimeconfig.cache
+C:\Users\Cannon\Developer\cs312\projects\project6-leetcode\obj\Debug\net8.0\ref\project6-leetcode.dll
